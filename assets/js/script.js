@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const minutesSpan = document.getElementById('minutes');
     const secondsSpan = document.getElementById('seconds');
 
-    // Set countdown for 4 hours, 45 mins, 30 secs from now
     let timeRemaining = (4 * 60 * 60) + (45 * 60) + 30;
 
     function updateCountdown() {
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (timeRemaining > 0) {
             timeRemaining--;
         } else {
-            // Reset to 2 hours when it reaches zero (Simulated scarcity)
             timeRemaining = 2 * 60 * 60;
         }
     }
@@ -38,12 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     offerButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             const offerId = e.target.getAttribute('data-offer');
-
-            // Uncheck all
             radioInputs.forEach(input => input.checked = false);
             radioLabels.forEach(label => label.classList.remove('highlight-radio'));
 
-            // Check selected
             const targetInput = document.querySelector(`input[value="offer${offerId}"]`);
             if (targetInput) {
                 targetInput.checked = true;
@@ -52,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle manual radio selection
     radioInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             radioLabels.forEach(label => label.classList.remove('highlight-radio'));
@@ -67,15 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
     accordionHeaders.forEach(header => {
         header.addEventListener('click', () => {
             const item = header.parentElement;
-
-            // Close all others
             document.querySelectorAll('.accordion-item').forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('active');
                 }
             });
-
-            // Toggle current
             item.classList.toggle('active');
         });
     });
@@ -83,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Form Submission (Google Sheets Integration)
     const orderForm = document.getElementById('orderForm');
-    // ضع رابط الـ Web App URL الخاص بك هنا
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhSuNPYEThdRAW2B06EDCYyxuXcjSlIgQ_Ah5mF-LPTOU5Ng2V_h1IssdtfjGO8w0lbw/exec';
 
     orderForm.addEventListener('submit', (e) => {
@@ -96,26 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             submitBtn.disabled = true;
 
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const city = document.getElementById('city').value;
-            const address = document.getElementById('address').value;
-            const offer = document.querySelector('input[name="offerSelect"]:checked').parentElement.innerText.trim();
+            // تجميع البيانات في FormData لإرسالها بشكل سليم
+            const formData = new URLSearchParams();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('city', document.getElementById('city').value);
+            formData.append('address', document.getElementById('address').value);
+            formData.append('offer', document.querySelector('input[name="offerSelect"]:checked').parentElement.innerText.trim());
 
-            // إرسال البيانات
+            // إرسال البيانات (في App Script نستخدم no-cors)
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // لضمان العمل مع Apps Script
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    'name': name,
-                    'phone': phone,
-                    'city': city,
-                    'address': address,
-                    'offer': offer
-                })
+                body: formData.toString()
             })
                 .then(() => {
                     alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
@@ -124,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.disabled = false;
                 })
                 .catch(error => {
-                    console.error('Error!', error.message);
+                    console.error('Submission Error:', error);
                     alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
