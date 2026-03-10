@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Form Submission
     const orderForm = document.getElementById('orderForm');
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypnwg09dxenLWcPkt9MBXelpmIPGA2LfIZBzW5eCl3KC-aknSJJVm_d-zdY9dz-NH12Q/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaXXa7yqyqmEJuxxnHEJKdP4FkJrpBwroJLZNu4c9RJS4J2otmL59wxyhAmQ5ldyEB/exec';
 
     if (orderForm) {
         orderForm.addEventListener('submit', function (e) {
