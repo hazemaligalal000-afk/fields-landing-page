@@ -13,20 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const h = Math.floor(timeRemaining / 3600);
         const m = Math.floor((timeRemaining % 3600) / 60);
         const s = timeRemaining % 60;
-
-        hoursSpan.textContent = h.toString().padStart(2, '0');
-        minutesSpan.textContent = m.toString().padStart(2, '0');
-        secondsSpan.textContent = s.toString().padStart(2, '0');
-
-        if (timeRemaining > 0) {
-            timeRemaining--;
-        } else {
-            timeRemaining = 2 * 60 * 60;
-        }
+        if (hoursSpan) hoursSpan.textContent = h.toString().padStart(2, '0');
+        if (minutesSpan) minutesSpan.textContent = m.toString().padStart(2, '0');
+        if (secondsSpan) secondsSpan.textContent = s.toString().padStart(2, '0');
+        if (timeRemaining > 0) timeRemaining--;
     }
-
     setInterval(updateCountdown, 1000);
-
 
     // 2. Select Offer Buttons
     const offerButtons = document.querySelectorAll('.select-offer');
@@ -38,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const offerId = e.target.getAttribute('data-offer');
             radioInputs.forEach(input => input.checked = false);
             radioLabels.forEach(label => label.classList.remove('highlight-radio'));
-
             const targetInput = document.querySelector(`input[value="offer${offerId}"]`);
             if (targetInput) {
                 targetInput.checked = true;
@@ -47,61 +38,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    radioInputs.forEach(input => {
-        input.addEventListener('change', (e) => {
-            radioLabels.forEach(label => label.classList.remove('highlight-radio'));
-            e.target.closest('.radio-label').classList.add('highlight-radio');
-        });
-    });
-
-
     // 3. FAQ Accordion
     const accordionHeaders = document.querySelectorAll('.accordion-header');
-
     accordionHeaders.forEach(header => {
         header.addEventListener('click', () => {
             const item = header.parentElement;
-            document.querySelectorAll('.accordion-item').forEach(otherItem => {
-                if (otherItem !== item) {
-                    otherItem.classList.remove('active');
-                }
-            });
             item.classList.toggle('active');
         });
     });
 
-
-    // 4. Form Submission (Google Sheets Integration)
+    // 4. Form Submission (Google Sheets Connection)
     const orderForm = document.getElementById('orderForm');
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhSuNPYEThdRAW2B06EDCYyxuXcjSlIgQ_Ah5mF-LPTOU5Ng2V_h1IssdtfjGO8w0lbw/exec';
 
-    orderForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (orderForm) {
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        if (orderForm.checkValidity()) {
             const submitBtn = orderForm.querySelector('.btn-submit');
             const originalText = submitBtn.innerHTML;
 
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             submitBtn.disabled = true;
 
-            // تجميع البيانات في FormData لإرسالها بشكل سليم
-            const formData = new URLSearchParams();
-            formData.append('name', document.getElementById('name').value);
-            formData.append('phone', document.getElementById('phone').value);
-            formData.append('city', document.getElementById('city').value);
-            formData.append('address', document.getElementById('address').value);
-            formData.append('offer', document.querySelector('input[name="offerSelect"]:checked').parentElement.innerText.trim());
+            // استخراج البيانات
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const city = document.getElementById('city').value;
+            const address = document.getElementById('address').value;
+            const offerElement = document.querySelector('input[name="offerSelect"]:checked');
+            const offerText = offerElement ? offerElement.parentElement.innerText.trim() : "غير محدد";
 
-            // إرسال البيانات (في App Script نستخدم no-cors)
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData.toString()
-            })
+            // بناء الرابط للإرسال عبر GET (أكثر استقراراً)
+            const finalUrl = SCRIPT_URL +
+                "?name=" + encodeURIComponent(name) +
+                "&phone=" + encodeURIComponent(phone) +
+                "&city=" + encodeURIComponent(city) +
+                "&address=" + encodeURIComponent(address) +
+                "&offer=" + encodeURIComponent(offerText);
+
+            // الإرسال بطريقة fetch الصامتة
+            fetch(finalUrl, { mode: 'no-cors' })
                 .then(() => {
                     alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
                     orderForm.reset();
@@ -109,12 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.disabled = false;
                 })
                 .catch(error => {
-                    console.error('Submission Error:', error);
-                    alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
+                    console.error('Submission error:', error);
+                    alert('حدث خطأ، يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة.');
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
-        }
-    });
-
+        });
+    }
 });
