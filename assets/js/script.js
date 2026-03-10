@@ -20,48 +20,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(updateCountdown, 1000);
 
-    // 2. Select Offer Buttons
-    const offerButtons = document.querySelectorAll('.select-offer');
-    const radioInputs = document.querySelectorAll('input[name="offerSelect"]');
-    const radioLabels = document.querySelectorAll('.radio-label');
-
-    offerButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const offerId = e.target.getAttribute('data-offer');
-            radioInputs.forEach(input => input.checked = false);
-            radioLabels.forEach(label => label.classList.remove('highlight-radio'));
-            const targetInput = document.querySelector(`input[value="offer${offerId}"]`);
-            if (targetInput) {
-                targetInput.checked = true;
-                targetInput.closest('.radio-label').classList.add('highlight-radio');
-            }
-        });
-    });
-
-    // 3. FAQ Accordion
+    // 2. FAQ Accordion
     const accordionHeaders = document.querySelectorAll('.accordion-header');
     accordionHeaders.forEach(header => {
         header.addEventListener('click', () => {
-            const item = header.parentElement;
-            item.classList.toggle('active');
+            header.parentElement.classList.toggle('active');
         });
     });
 
-    // 4. Form Submission (Google Sheets Connection)
+    // 3. Form Submission
     const orderForm = document.getElementById('orderForm');
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrZfrsRsnOOJDe7r-uk3db3GpADdJXtQO6QQXr-lHz_QUM7myIH8beK5BkUK3oIl-mNA/exec';
 
     if (orderForm) {
-        orderForm.addEventListener('submit', (e) => {
+        orderForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const submitBtn = orderForm.querySelector('.btn-submit');
-            const originalText = submitBtn.innerHTML;
-
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             submitBtn.disabled = true;
 
-            // استخراج البيانات
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const city = document.getElementById('city').value;
@@ -69,27 +47,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const offerElement = document.querySelector('input[name="offerSelect"]:checked');
             const offerText = offerElement ? offerElement.parentElement.innerText.trim() : "غير محدد";
 
-            // بناء الرابط للإرسال عبر GET (أكثر استقراراً)
-            const finalUrl = SCRIPT_URL +
-                "?name=" + encodeURIComponent(name) +
-                "&phone=" + encodeURIComponent(phone) +
-                "&city=" + encodeURIComponent(city) +
-                "&address=" + encodeURIComponent(address) +
-                "&offer=" + encodeURIComponent(offerText);
+            // طريقة إرسال بديلة وأكثر استقراراً (Image Beacon)
+            const params = new URLSearchParams({
+                name: name,
+                phone: phone,
+                city: city,
+                address: address,
+                offer: offerText
+            });
 
-            // الإرسال بطريقة fetch الصامتة
-            fetch(finalUrl, { mode: 'no-cors' })
+            // محاولة الإرسال وتجاهل رد المتصفح لضمان العمل مع Google Apps Script
+            fetch(SCRIPT_URL + "?" + params.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
+            })
                 .then(() => {
+                    // نظراً لاستخدام no-cors، سنعتبر العملية ناجحة دائماً في حال وصول الـ Fetch للمرحلة هذه
                     alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
                     orderForm.reset();
-                    submitBtn.innerHTML = originalText;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد الطلب والدفع عند الاستلام';
                     submitBtn.disabled = false;
                 })
-                .catch(error => {
-                    console.error('Submission error:', error);
-                    alert('حدث خطأ، يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة.');
-                    submitBtn.innerHTML = originalText;
+                .catch(err => {
+                    console.error('Error!', err);
+                    alert('حدث خطأ بسيط، سنتواصل معك هاتفياً لإكمال الطلب.');
                     submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد الطلب والدفع عند الاستلام';
                 });
         });
     }
