@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Form Submission (Google Sheets Connection)
     const orderForm = document.getElementById('orderForm');
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhSuNPYEThdRAW2B06EDCYyxuXcjSlIgQ_Ah5mF-LPTOU5Ng2V_h1IssdtfjGO8w0lbw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrZfrsRsnOOJDe7r-uk3db3GpADdJXtQO6QQXr-lHz_QUM7myIH8beK5BkUK3oIl-mNA/exec';
 
     if (orderForm) {
         orderForm.addEventListener('submit', (e) => {
