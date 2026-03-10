@@ -38,14 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     offerButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             const offerId = e.target.getAttribute('data-offer');
-            
+
             // Uncheck all
             radioInputs.forEach(input => input.checked = false);
             radioLabels.forEach(label => label.classList.remove('highlight-radio'));
 
             // Check selected
             const targetInput = document.querySelector(`input[value="offer${offerId}"]`);
-            if(targetInput) {
+            if (targetInput) {
                 targetInput.checked = true;
                 targetInput.closest('.radio-label').classList.add('highlight-radio');
             }
@@ -67,10 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
     accordionHeaders.forEach(header => {
         header.addEventListener('click', () => {
             const item = header.parentElement;
-            
+
             // Close all others
             document.querySelectorAll('.accordion-item').forEach(otherItem => {
-                if(otherItem !== item) {
+                if (otherItem !== item) {
                     otherItem.classList.remove('active');
                 }
             });
@@ -81,28 +81,54 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // 4. Form Submission (Simulated)
+    // 4. Form Submission (Google Sheets Integration)
     const orderForm = document.getElementById('orderForm');
-    
+    // ضع رابط الـ Web App URL الخاص بك هنا
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhSuNPYEThdRAW2B06EDCYyxuXcjSlIgQ_Ah5mF-LPTOU5Ng2V_h1IssdtfjGO8w0lbw/exec';
+
     orderForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        // Basic validation check
-        if(orderForm.checkValidity()) {
+
+        if (orderForm.checkValidity()) {
             const submitBtn = orderForm.querySelector('.btn-submit');
             const originalText = submitBtn.innerHTML;
-            
+
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             submitBtn.disabled = true;
 
-            // Simulate API call
-            setTimeout(() => {
-                // Success Message
-                alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
-                orderForm.reset();
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }, 1500);
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const city = document.getElementById('city').value;
+            const address = document.getElementById('address').value;
+            const offer = document.querySelector('input[name="offerSelect"]:checked').parentElement.innerText.trim();
+
+            // إرسال البيانات
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // لضمان العمل مع Apps Script
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'name': name,
+                    'phone': phone,
+                    'city': city,
+                    'address': address,
+                    'offer': offer
+                })
+            })
+                .then(() => {
+                    alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
+                    orderForm.reset();
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
         }
     });
 
