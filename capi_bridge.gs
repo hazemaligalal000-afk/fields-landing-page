@@ -31,14 +31,15 @@ function doGet(e) {
   ]);
 
   // 2. Prepare Facebook CAPI Payload
+  const eventName = p.event_name || "Purchase";
   const payload = {
     "data": [
       {
-        "event_name": "Purchase",
+        "event_name": eventName,
         "event_time": Math.floor(Date.now() / 1000),
         "action_source": "website",
         "event_id": p.event_id,
-        "event_source_url": "https://yourdomain.com", // Update this
+        "event_source_url": p.source_url || "https://yourdomain.com", 
         "user_data": {
           "ph": [hashSensitiveData(p.phone_normalized)],
           "fn": [hashSensitiveData(p.name.split(' ')[0].toLowerCase().trim())],

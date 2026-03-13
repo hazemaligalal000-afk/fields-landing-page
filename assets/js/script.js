@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Form Submission & Conversion API (CAPI) Bridge
     const orderForm = document.getElementById('orderForm');
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrxR-TGa3677foz7Ory2shRj0dshXQzdOsdskvzo6JAp5VnE3X5-vaOtLXamDDKUie3g/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNvfoS-MoFurBE7qAWaJkMjx15LRaxs9gOYN9IePvzOp6hilDNY-UqTLY_3hs4MK8LSg/exec';
 
     if (orderForm) {
         orderForm.addEventListener('submit', function (e) {
@@ -87,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const phone = document.getElementById('phone').value;
             const city = document.getElementById('city').value;
             const address = document.getElementById('address').value;
+            const offerElement = orderForm.querySelector('input[name="offerSelect"]:checked');
+            const offerValue = offerElement && offerElement.value === 'offer2' ? 40 : 25;
+            const offerText = offerElement && offerElement.value === 'offer2' ? 'عرض علبتين فيلدز + علبتين لين (40 دينار)' : 'عرض علبة فيلدز + علبة لين (25 دينار)';
+
             // Prepared Meta-Ready Payload for immediate algorithm training
             const eventID = getEventId('pur');
             const customerPhone = normalizePhone(phone);
@@ -123,6 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     offer: offerText,
                     timestamp: new Date().toISOString()
                 }, { eventID: 'sub_' + eventID });
+
+                // Lead Event (Specifically requested by user)
+                fbq('track', 'Lead', {
+                    content_name: offerText,
+                    content_category: 'Weight Loss',
+                    value: offerValue,
+                    currency: 'JOD'
+                }, { eventID: 'lead_' + eventID });
             }
 
             // Prepare Payload for CAPI Bridge
@@ -134,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 address: address,
                 offer: offerText,
                 event_id: eventID,
+                event_name: 'Lead', // Fulfilling user request for Lead event
+                source_url: window.location.href,
                 fbc: document.cookie.split('; ').find(row => row.startsWith('_fbc='))?.split('=')[1] || '',
                 fbp: document.cookie.split('; ').find(row => row.startsWith('_fbp='))?.split('=')[1] || '',
                 user_agent: navigator.userAgent,
@@ -147,10 +161,19 @@ document.addEventListener('DOMContentLoaded', () => {
             })
                 .then(() => {
                     // نظراً لاستخدام no-cors، سنعتبر العملية ناجحة دائماً في حال وصول الـ Fetch للمرحلة هذه
-                    alert('تم استلام طلبك بنجاح! سيتم التواصل معك قريباً لتأكيد الشحن.');
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> تم الإرسال بنجاح!';
+                    submitBtn.style.backgroundColor = '#2b9348';
+                    
+                    // إظهار رسالة نجاح مخصصة بدلاً من الـ alert التقليدي
+                    showSuccessMessage();
+                    
                     orderForm.reset();
-                    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد الطلب والدفع عند الاستلام';
-                    submitBtn.disabled = false;
+                    
+                    setTimeout(() => {
+                        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد الطلب والدفع عند الاستلام';
+                        submitBtn.disabled = false;
+                        submitBtn.style.backgroundColor = '';
+                    }, 5000);
                 })
                 .catch(err => {
                     console.error('Error!', err);
@@ -159,5 +182,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد الطلب والدفع عند الاستلام';
                 });
         });
+
+        function showSuccessMessage() {
+            const overlay = document.getElementById('overlay');
+            if (!overlay) return;
+
+            // إنشاء عنصر الرسالة
+            const msgBox = document.createElement('div');
+            msgBox.className = 'success-toast';
+            msgBox.innerHTML = `
+                <div class="toast-content">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <h3>شكراً لثقتكم!</h3>
+                    <p>تم استلام طلبك بنجاح. سنقوم بالاتصال بك خلال ساعات لتأكيد العنوان وموعد التسليم.</p>
+                    <button class="btn btn-primary" onclick="this.parentElement.parentElement.remove(); document.getElementById('overlay').style.display='none';">حسناً</button>
+                </div>
+            `;
+            
+            document.body.appendChild(msgBox);
+            overlay.style.display = 'block';
+        }
     }
 });
