@@ -14,11 +14,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap"
         rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Meta Pixel Code -->
+    <script>
+        // 🔄 ضع رقم البكسل الخاص بك هنا
+        window.FB_PIXEL_ID = '947262467653801'; 
+        
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+        fbq('init', window.FB_PIXEL_ID);
+        
+        // توليد Event ID فريد للصفحة لدعم Conversion API
+        window.pageEventId = 'page_view_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        fbq('track', 'PageView', {}, { eventID: window.pageEventId });
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=947262467653801&ev=PageView&noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
 </head>
 
 <body>
@@ -396,16 +419,19 @@
                 </div>
                 <form id="orderForm" class="order-form">
                     <div class="form-group">
-                        <label for="name">الاسم الكريم <span class="req">*</span></label>
+                        <label for="name"><i class="fa-solid fa-user text-blue"></i> الاسم الكريم <span
+                                class="req">*</span></label>
                         <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">رقم الهاتف <span class="req">*</span></label>
+                        <label for="phone"><i class="fa-solid fa-phone text-green"></i> رقم الهاتف <span
+                                class="req">*</span></label>
                         <input type="tel" id="phone" placeholder="أدخل رقم الهاتف متبوعاً بمقدمة (07)" required
                             dir="ltr">
                     </div>
                     <div class="form-group">
-                        <label for="city">المحافظة / المدينة <span class="req">*</span></label>
+                        <label for="city"><i class="fa-solid fa-location-dot text-orange"></i> المحافظة / المدينة <span
+                                class="req">*</span></label>
                         <select id="city" required>
                             <option value="">اختر محافظتك...</option>
                             <option value="عمان">عَمّان</option>
@@ -423,13 +449,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="address">العنوان بالتفصيل <span class="req">*</span></label>
+                        <label for="address"><i class="fa-solid fa-map-pin text-gray"></i> العنوان بالتفصيل <span
+                                class="req">*</span></label>
                         <textarea id="address"
                             placeholder="يرجى كتابة العنوان بالتفصيل لكي يصلك طلبك في 24 ساعة (اسم المنطقة، الشارع، أقرب مَعلم)"
                             required rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>العرض المطلوب <span class="req">*</span></label>
+                        <label><i class="fa-solid fa-box text-green"></i> العرض المطلوب <span
+                                class="req">*</span></label>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="offerSelect" value="offer1" checked>
